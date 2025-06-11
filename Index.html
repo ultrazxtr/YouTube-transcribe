@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video to Text Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        main {
+            max-width: 800px;
+            margin: '0 auto';
+        }
+        #video-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #video-url {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+        #convert-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #convert-btn:hover {
+            background-color: #3e8e41;
+        }
+        #transcript-container {
+            margin-top: 20px;
+        }
+        #transcript {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        #error-container {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>YouTube Video to Text Converter</h1>
+    </header>
+    <main>
+        <form id="video-form">
+            <input type="text" id="video-url" placeholder="Enter YouTube video URL">
+            <button id="convert-btn">Convert to Text</button>
+        </form>
+        <div id="transcript-container">
+            <h2>Transcript:</h2>
+            <textarea id="transcript" readonly></textarea>
+        </div>
+        <div id="error-container">
+            <p id="error-message"></p>
+        </div>
+    </main>
+    <script>
+        const videoForm = document.getElementById('video-form');
+        const videoUrlInput = document.getElementById('video-url');
+        const convertBtn = document.getElementById('convert-btn');
+        const transcriptContainer = document.getElementById('transcript-container');
+        const transcriptTextarea = document.getElementById('transcript');
+        const errorContainer = document.getElementById('error-container');
+        const errorMessage = document.getElementById('error-message');
+
+        videoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const videoUrl = videoUrlInput.value.trim();
+            if (videoUrl) {
+                fetch('/transcribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: videoUrl }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    transcriptTextarea.value = data.transcript;
+                    errorContainer.style.display = 'none';
+                })
+                .catch(error => {
+                    errorMessage.textContent = error.message;
+                    errorContainer.style.display = 'block';
+                    transcriptContainer.style.display = 'none';
+                });
+            } else {
+                errorMessage.textContent = 'Please enter a valid YouTube video URL';
+                errorContainer.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
